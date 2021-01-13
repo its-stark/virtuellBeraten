@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SshConfigs">
+    <configs>
+      <sshConfig host="dev.s3-medien.de" id="eb47451b-16c5-4519-b28c-bafe654b5c49" keyPath="$USER_HOME$/Dev/Zugaenge/ssh/s3-medien/dev.s3-medien.de/id_rsa" port="4022" nameFormat="DESCRIPTIVE" username="root" />
+    </configs>
+  </component>
+</project>

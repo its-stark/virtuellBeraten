@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="f0ee50cb-da8e-43a3-b579-06e286e9c9a0" name="dev.s3-medien.de" url="http://live-academy.s3-medien.de">
+        <fileTransfer rootFolder="/root/docker/live-academy/volumes/wordpress/" accessType="SFTP" host="dev.s3-medien.de" port="4022" sshConfigId="eb47451b-16c5-4519-b28c-bafe654b5c49" sshConfig="root@dev.s3-medien.de:4022 key" keyPair="true">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>
