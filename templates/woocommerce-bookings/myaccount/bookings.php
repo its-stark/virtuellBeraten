@@ -22,6 +22,42 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+$user = wp_get_current_user();
+if ( in_array( 'author', (array) $user->roles ) ) {
+
+    if(isset($_REQUEST['action']) && $_REQUEST['action'] == "createRoom"){
+        s3m_createRoom(intval($_REQUEST['booking_id']));
+    }
+
+    //The user has the "author" role
+    $args = array(
+
+        'post_type' => 'product',
+        'post_status' => 'any',
+        'order'          => 'ASC',
+        'orderby'        => 'post_date',
+        'posts_per_page' => 100,
+        'author' => $user->ID,
+    );
+    $posts = get_posts($args);
+    global $wpdb;
+    echo $user->ID;
+    foreach ($posts as $post){
+        //get bookings
+        $bookings = $wpdb->get_results("SELECT * FROM $wpdb->postmeta
+WHERE meta_key = '_booking_product_id' AND  meta_value = $post->ID", ARRAY_A);
+
+        foreach ($bookings as $booking){
+            $post_meta = get_post_meta(intval($booking['post_id']));
+            if(!isset($post_meta['_video_url'][0])) $post_meta['_video_url'][0] = "";
+            $erstellt = isset($post_meta['_room_created'][0]) ? $post_meta['_room_created'][0] : "nicht erstellt";
+            echo $booking['post_id'].' - '.$post_meta['_booking_start'][0].' - <a href="?action=createRoom&booking_id='.$booking['post_id'].'">Raum erstellen</a> - <a target="_blank" href="'.$post_meta['_video_url'][0].'">Raum starten</a> - Erstellt: '.$erstellt.'<br/>';
+        }
+
+    }
+}else{
+
+
 $count = 0;
 
 if ( ! empty( $tables ) ) : ?>
@@ -62,7 +98,7 @@ if ( ! empty( $tables ) ) : ?>
                         $videoLink = get_post_meta($booking->get_id(), '_video_url', true);
 
                         ?>
-                        <td class="booking-status"><a href="<?php echo $videoLink; ?>">Öffnen</a></td>
+                        <td class="booking-status"><a target="_blank" href="<?php echo $videoLink; ?>">Öffnen</a></td>
 						<td class="order-number">
 							<?php if ( $booking->get_order() ) : ?>
 							<a href="<?php echo esc_url( $booking->get_order()->get_view_order_url() ); ?>">
@@ -106,4 +142,4 @@ if ( ! empty( $tables ) ) : ?>
 		</a>
 		<?php esc_html_e( 'No bookings available yet.', 'woocommerce-bookings' ); ?>
 	</div>
-<?php endif; ?>
+<?php endif; } ?>
