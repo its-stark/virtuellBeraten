@@ -41,7 +41,11 @@ if ( in_array( 'author', (array) $user->roles ) ) {
     );
     $posts = get_posts($args);
     global $wpdb;
-    echo $user->ID;
+
+    ?>
+     <table cellpadding="5">
+         <tr><td>ID</td><td>Start</td><td>Raum Erstellen</td><td>Raum beitreten</td><td>Raum Status</td></tr>
+<?php
     foreach ($posts as $post){
         //get bookings
         $bookings = $wpdb->get_results("SELECT * FROM $wpdb->postmeta
@@ -51,10 +55,13 @@ WHERE meta_key = '_booking_product_id' AND  meta_value = $post->ID", ARRAY_A);
             $post_meta = get_post_meta(intval($booking['post_id']));
             if(!isset($post_meta['_video_url'][0])) $post_meta['_video_url'][0] = "";
             $erstellt = isset($post_meta['_room_created'][0]) ? $post_meta['_room_created'][0] : "nicht erstellt";
-            echo $booking['post_id'].' - '.$post_meta['_booking_start'][0].' - <a href="?action=createRoom&booking_id='.$booking['post_id'].'">Raum erstellen</a> - <a target="_blank" href="'.$post_meta['_video_url'][0].'">Raum starten</a> - Erstellt: '.$erstellt.'<br/>';
+            echo '<tr><td>'.$booking['post_id'].'</td><td>'.$post_meta['_booking_start'][0].'</td><td><a href="?action=createRoom&booking_id='.$booking['post_id'].'">Jetzt Erstellen</a></td><td><a target="_blank" href="'.$post_meta['_video_url'][0].'">Jetzt beitreten</a></td><td>'.$erstellt.'</td></tr>';
         }
 
     }
+    ?>
+     </table>
+    <?php
 }else{
 
 
@@ -122,11 +129,13 @@ if ( ! empty( $tables ) ) : ?>
 		<?php do_action( 'woocommerce_before_account_bookings_pagination' ); ?>
 
 		<div class="woocommerce-pagination woocommerce-pagination--without-numbers woocommerce-Pagination">
-			<?php if ( 1 !== $page ) : ?>
+            <?php /** @var TYPE_NAME $page */
+            if ( $page !== 1) : ?>
 				<a class="woocommerce-button woocommerce-button--previous woocommerce-Button woocommerce-Button--previous button" href="<?php echo esc_url( wc_get_endpoint_url( 'bookings', $page - 1 ) ); ?>"><?php esc_html_e( 'Previous', 'woocommerce-bookings' ); ?></a>
 			<?php endif; ?>
 
-			<?php if ( $count > $bookings_per_page ) : ?>
+            <?php /** @var TYPE_NAME $bookings_per_page */
+            if ( $count > $bookings_per_page ) : ?>
 				<a class="woocommerce-button woocommerce-button--next woocommerce-Button woocommerce-Button--next button" href="<?php echo esc_url( wc_get_endpoint_url( 'bookings', $page + 1 ) ); ?>"><?php esc_html_e( 'Next', 'woocommerce-bookings' ); ?></a>
 			<?php endif; ?>
 		</div>

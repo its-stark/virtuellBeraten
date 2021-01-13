@@ -9,11 +9,13 @@ Author: tstark
 Author URI: https://www.s3-medien.de
 */
 
-/**
- * @param $order_id
- */
 //s3m_woocommerce_order_status_completed(149);
 //s3m_createBooking(149);
+
+/**
+ * create a room booking with given the order id
+ * @param $order_id
+ */
 function s3m_woocommerce_order_status_completed( $order_id ) {
     error_log( "Order processing for order $order_id on site ", 0 );
     $data = $order_id.get_site_url();
@@ -37,13 +39,17 @@ function s3m_woocommerce_order_status_completed( $order_id ) {
     }
 }
 
-function s3m_createBooking($order_id){
-    $data = $order_id.get_site_url();
-    $booking_token = hash('sha512', $data, false);
+/**
+ * create a room booking with given the boking id
+ * @param $booking_id
+ */
+function s3m_createBooking($booking_id){
 
     $endpoint = 'http://videoapi.s3-medien.de/api/room/book';
 
-    $booking_meta = get_post_meta($order_id);
+    $booking_meta = get_post_meta($booking_id);
+
+    $booking_token = createBookingToken($booking_meta);
 
     //20210121110000
     $start_date = DateTime::createFromFormat('YmdHis', $booking_meta['_booking_start'][0]);
@@ -83,8 +89,8 @@ function s3m_createBooking($order_id){
 
     $data = json_decode($response['body']);
 
-    update_post_meta($order_id, '_video_url', $data->link);
-    update_post_meta($order_id, '_room_id', $data->room_id);
+    update_post_meta($booking_id, '_video_url', $data->link);
+    update_post_meta($booking_id, '_room_id', $data->room_id);
     //send mail to customer
 
 }
@@ -94,6 +100,10 @@ function s3m_createBooking($order_id){
 add_action('woocommerce_booking_paid', 's3m_createBooking', 10, 1 );
 //add_action('woocommerce_before_thankyou', 's3m_woocommerce_order_status_completed');
 
+/**
+ * create a conference room with given the order id
+ * @param $order_id
+ */
 function s3m_createVideoConferenceRoom($order_id){
     //error_log( "Order processing for order $order_id on site ".get_site_url(), 0 );
 
@@ -110,12 +120,16 @@ function s3m_createVideoConferenceRoom($order_id){
     }
 }
 
-function s3m_createRoom($order_id){
-    $data = $order_id.get_site_url();
-    $booking_token = hash('sha512', $data, false);
+/**
+ * create a conference room with given the booking id
+ * @param $booking_id
+ */
+function s3m_createRoom($booking_id){
 
     $endpoint = 'http://videoapi.s3-medien.de/api/room/create';
-    $booking_meta = get_post_meta($order_id);
+    $booking_meta = get_post_meta($booking_id);
+
+    $booking_token = createBookingToken($booking_meta);
 
     //var_dump($booking_meta);
 
@@ -155,6 +169,17 @@ function s3m_createRoom($order_id){
     $response = wp_remote_post($endpoint, $options);
     $data = json_decode($response['body']);
 
-    update_post_meta($order_id, '_video_url', $data->link);
-    update_post_meta($order_id, '_room_created', date("Y-m-d H:i:s"));
+    update_post_meta($booking_id, '_video_url', $data->link);
+    update_post_meta($booking_id, '_room_created', date("Y-m-d H:i:s"));
+}
+
+/**
+ * create a unique token to identify a booking
+ * @param $booking_meta
+ * @return string
+ */
+function createBookingToken($booking_meta): string
+{
+    $data = $booking_meta['_booking_order_item_id'].$booking_meta['_booking_start'].get_site_url();
+    return hash('sha512', $data, false);
 }
